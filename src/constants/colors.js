@@ -5,4 +5,6 @@ export default {
   primaryText60: '#000',
   secondaryText30: '#fff',
   textInputBackground: '#fff',
+
+  unselectedCategory: '#ccc'
 };

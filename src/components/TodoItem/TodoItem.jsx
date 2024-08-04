@@ -9,12 +9,12 @@ import {
   faSquare,
   faCheckSquare,
   faPencil,
-} from '../constants/icons';
-import colors from '../constants/colors';
+} from '../../constants/icons';
+import colors from '../../constants/colors';
 
-const TodoItem = ({item, toggleComplete, deleteTodo, navigation}) => {
+const TodoItem = ({item, toggleComplete, deleteTodo, categoryColor, navigation}) => {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { borderLeftColor: categoryColor, borderLeftWidth: 5 }]}>
       <TouchableOpacity onPress={() => deleteTodo(item)}>
         <Text>Delete</Text>
       </TouchableOpacity>

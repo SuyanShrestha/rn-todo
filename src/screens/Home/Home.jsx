@@ -1,52 +1,89 @@
-import {
-  View,
-  Text,
-  Keyboard,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-  Pressable,
-} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, FlatList} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {firebase} from '../../../config';
 
 import colors from '../../constants/colors';
+import categories from '../../constants/categories';
 
-// components
-import TodoItem from '../../components/TodoItem';
+import TodoItem from '../../components/TodoItem/TodoItem';
 
-const Home = ({navigation}) => {
+const Home = ({navigation, route}) => {
   const [todos, setTodos] = useState([]);
+  const [filteredTodos, setFilteredTodos] = useState([]);
+  const [filters, setFilters] = useState({
+    selectedTime: null,
+    selectedCategory: null,
+    showIncomplete: false,
+  });
+  const [originalTodos, setOriginalTodos] = useState([]); 
   const todoRef = firebase.firestore().collection('todos');
-  const [addData, setAddData] = useState('');
 
   // fetching data from firestore
   useEffect(() => {
-    todoRef.orderBy('createdAt', 'desc').onSnapshot(querySnapshot => {
-      const todos = [];
-      querySnapshot.forEach(doc => {
-        const {heading, createdAt, completed} = doc.data();
-        todos.push({id: doc.id, heading, createdAt, completed});
+    const unsubscribe = todoRef
+      .orderBy('createdAt', 'desc')
+      .onSnapshot(querySnapshot => {
+        const todos = [];
+        querySnapshot.forEach(doc => {
+          const {heading, createdAt, completed, category} = doc.data();
+          todos.push({id: doc.id, heading, createdAt, completed, category});
+        });
+        setTodos(todos);
+        setOriginalTodos(todos); // original todo made for clearFilter function
+        setFilteredTodos(todos); 
       });
-      setTodos(todos);
-    });
+    return () => unsubscribe();
   }, []);
 
-  // adding todo
-  const addTodo = () => {
-    if (addData && addData.length > 0) {
-      const timeStamp = firebase.firestore.FieldValue.serverTimestamp();
-      todoRef.add({heading: addData, createdAt: timeStamp, completed: false});
-      setAddData('');
-      Keyboard.dismiss();
+  useEffect(() => {
+    applyFilters();
+  }, [filters, todos]);
+
+  useEffect(() => {
+    if (route.params) {
+      const {selectedTime, selectedCategory, showIncomplete} = route.params;
+      if (selectedTime || selectedCategory || showIncomplete !== undefined) {
+        setFilters({
+          selectedTime,
+          selectedCategory,
+          showIncomplete,
+        });
+      } else {
+        // if no filter, will just use originalTodo that i made earlier
+        setFilteredTodos(originalTodos);
+      }
     }
+  }, [route.params]);
+
+  const applyFilters = () => {
+    let filteredList = [...todos];
+
+    // Filter by category
+    if (filters.selectedCategory) {
+      filteredList = filteredList.filter(
+        todo => todo.category === filters.selectedCategory,
+      );
+    }
+
+    // Filter by completion status
+    if (filters.showIncomplete) {
+      filteredList = filteredList.filter(todo => !todo.completed);
+    }
+
+    // Sort by time
+    if (filters.selectedTime === 'newToOld') {
+      filteredList.sort((a, b) => b.createdAt - a.createdAt);
+    } else if (filters.selectedTime === 'oldToNew') {
+      filteredList.sort((a, b) => a.createdAt - b.createdAt);
+    }
+
+    setFilteredTodos(filteredList);
   };
 
   // deleting todo
-  const deleteTodo = todos => {
+  const deleteTodo = todo => {
     todoRef
-      .doc(todos.id)
+      .doc(todo.id)
       .delete()
       .then(() => alert('Deleted successfully'))
       .catch(error => {
@@ -66,25 +103,23 @@ const Home = ({navigation}) => {
 
   return (
     <View style={{flex: 1, backgroundColor: colors.primaryColor60}}>
-      <Text>Home Screen</Text>
+      <Text style={styles.title}>Home Screen</Text>
 
-      <View style={styles.formContainer}>
-        <TextInput
-          style={styles.input}
-          value={addData}
-          onChangeText={heading => setAddData(heading)}
-          placeholder="Enter todo"
-          placeholderTextColor="#aaaaaa"
-          autoCapitalize="none"
-        />
-        <TouchableOpacity style={styles.button} onPress={addTodo}>
-          <Text style={styles.buttonText}>Add</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate('AddTodo')}>
+        <Text style={styles.addButtonText}>Add Todo</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.filterButton}
+        onPress={() => navigation.navigate('Filter', {filters})}>
+        <Text style={styles.filterButtonText}>Filter</Text>
+      </TouchableOpacity>
 
       <FlatList
-        keyExtractor={(item) => item.id}
-        data={todos}
+        keyExtractor={item => item.id}
+        data={filteredTodos}
         numColumns={1}
         renderItem={({item}) => (
           <TodoItem
@@ -92,6 +127,9 @@ const Home = ({navigation}) => {
             toggleComplete={toggleComplete}
             deleteTodo={deleteTodo}
             navigation={navigation}
+            categoryColor={
+              categories.find(cat => cat.name === item.category)?.color
+            }
           />
         )}
       />
@@ -102,37 +140,34 @@ const Home = ({navigation}) => {
 export default Home;
 
 const styles = StyleSheet.create({
-
-  formContainer: {
-    flexDirection: 'row',
-    height: 80,
-    marginLeft: 10,
-    marginRight: 10,
-    marginTop: 100,
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    margin: 20,
   },
-
-  input: {
-    height: 48,
-    borderRadius: 5,
-    overflow: 'hidden',
-    backgroundColor: colors.secondaryText30,
-    paddingLeft: 16,
-    flex: 1,
-    marginRight: 5,
-  },
-
-  button: {
+  addButton: {
     height: 47,
     borderRadius: 5,
     backgroundColor: colors.secondaryBgColor10,
-    width: 80,
     alignItems: 'center',
     justifyContent: 'center',
+    margin: 20,
   },
-
-  buttonText: {
-    color: colors.secondaryText30,
+  addButtonText: {
+    color: '#fff',
     fontSize: 20,
   },
-
+  filterButton: {
+    height: 47,
+    borderRadius: 5,
+    backgroundColor: colors.secondaryBgColor10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  filterButtonText: {
+    color: '#fff',
+    fontSize: 20,
+  },
 });
