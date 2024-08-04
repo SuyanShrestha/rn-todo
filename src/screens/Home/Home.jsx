@@ -11,6 +11,8 @@ import {
 import React, {useEffect, useState} from 'react';
 import {firebase} from '../../../config';
 
+import colors from '../../constants/colors';
+
 // components
 import TodoItem from '../../components/TodoItem';
 
@@ -63,7 +65,7 @@ const Home = ({navigation}) => {
   };
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{flex: 1, backgroundColor: colors.primaryColor60}}>
       <Text>Home Screen</Text>
 
       <View style={styles.formContainer}>
@@ -81,7 +83,7 @@ const Home = ({navigation}) => {
       </View>
 
       <FlatList
-        key={'_'}
+        keyExtractor={(item) => item.id}
         data={todos}
         numColumns={1}
         renderItem={({item}) => (
@@ -113,7 +115,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 5,
     overflow: 'hidden',
-    backgroundColor: '#fff',
+    backgroundColor: colors.secondaryText30,
     paddingLeft: 16,
     flex: 1,
     marginRight: 5,
@@ -122,14 +124,14 @@ const styles = StyleSheet.create({
   button: {
     height: 47,
     borderRadius: 5,
-    backgroundColor: '#788eec',
+    backgroundColor: colors.secondaryBgColor10,
     width: 80,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   buttonText: {
-    color: '#fff',
+    color: colors.secondaryText30,
     fontSize: 20,
   },
 

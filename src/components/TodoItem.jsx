@@ -10,6 +10,7 @@ import {
   faCheckSquare,
   faPencil,
 } from '../constants/icons';
+import colors from '../constants/colors';
 
 const TodoItem = ({item, toggleComplete, deleteTodo, navigation}) => {
   return (
@@ -41,13 +42,13 @@ const TodoItem = ({item, toggleComplete, deleteTodo, navigation}) => {
           <FontAwesomeIcon
             icon={item.completed ? faCheckSquare : faSquare}
             size={20}
-            color={item.completed ? 'grey' : 'lightgrey'}
+            color={item.completed ? colors.secondaryBgColor10 : 'lightgrey'}
           />
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => navigation.navigate('Details', {item})}>
-          <FontAwesomeIcon icon={faPencil} size={20} color="grey" />
+          <FontAwesomeIcon icon={faPencil} size={20} color={colors.secondaryBgColor10} />
         </TouchableOpacity>
       </View>
     </View>
@@ -56,7 +57,7 @@ const TodoItem = ({item, toggleComplete, deleteTodo, navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#e5e5e5',
+    backgroundColor: colors.secondaryBgColor30,
     padding: 15,
     borderRadius: 15,
     margin: 5,

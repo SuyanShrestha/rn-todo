@@ -3,6 +3,8 @@ import React, {useState} from 'react';
 
 import {firebase} from '../../../config';
 
+import colors from '../../constants/colors';
+
 const Details = ({navigation, route}) => {
   const todoRef = firebase.firestore().collection('todos');
   const [textHeading, setTextHeading] = useState(route.params.item.name);
@@ -31,7 +33,7 @@ const Details = ({navigation, route}) => {
         placeholder="Update Todo"
       />
       <TouchableOpacity style={styles.buttonUpdate} onPress={updateTodo}>
-        <Text>Update Todo</Text>
+        <Text style={styles.buttonUpdateText}>Update Todo</Text>
       </TouchableOpacity>
     </View>
   );
@@ -49,8 +51,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     padding: 10,
     fontSize: 15,
-    color: "#000000",
-    backgroundColor: "#e0e0e0",
+    color: colors.primaryTextColor60,
+    backgroundColor: colors.textInputBackground,
     borderRadius: 5,
   },
   buttonUpdate: {
@@ -61,6 +63,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     borderRadius: 4,
     elevation: 10,
-    backgroundColor: "#0de065"
-  }
+    backgroundColor: colors.secondaryBgColor10,
+  },
+  buttonUpdateText: {
+    color: colors.secondaryText30,
+    fontSize: 16,
+  },
 });
