@@ -11,7 +11,8 @@ import {
 import React, {useEffect, useState} from 'react';
 import {firebase} from '../../../config';
 
-import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+// components
+import TodoItem from '../../components/TodoItem';
 
 const Home = ({navigation}) => {
   const [todos, setTodos] = useState([]);
@@ -23,8 +24,8 @@ const Home = ({navigation}) => {
     todoRef.orderBy('createdAt', 'desc').onSnapshot(querySnapshot => {
       const todos = [];
       querySnapshot.forEach(doc => {
-        const {heading} = doc.data();
-        todos.push({id: doc.id, heading});
+        const {heading, createdAt, completed} = doc.data();
+        todos.push({id: doc.id, heading, createdAt, completed});
       });
       setTodos(todos);
     });
@@ -34,7 +35,7 @@ const Home = ({navigation}) => {
   const addTodo = () => {
     if (addData && addData.length > 0) {
       const timeStamp = firebase.firestore.FieldValue.serverTimestamp();
-      todoRef.add({heading: addData, createdAt: timeStamp});
+      todoRef.add({heading: addData, createdAt: timeStamp, completed: false});
       setAddData('');
       Keyboard.dismiss();
     }
@@ -46,6 +47,16 @@ const Home = ({navigation}) => {
       .doc(todos.id)
       .delete()
       .then(() => alert('Deleted successfully'))
+      .catch(error => {
+        alert(error);
+      });
+  };
+
+  // complete checkbox
+  const toggleComplete = todo => {
+    todoRef
+      .doc(todo.id)
+      .update({completed: !todo.completed})
       .catch(error => {
         alert(error);
       });
@@ -74,20 +85,12 @@ const Home = ({navigation}) => {
         data={todos}
         numColumns={1}
         renderItem={({item}) => (
-          <View>
-            <Pressable
-              style={styles.container}
-              onPress={() => navigation.navigate('Details', {item})}>
-              <TouchableOpacity onPress={() => deleteTodo(item)}>
-                <Text>Delete</Text>
-              </TouchableOpacity>
-              <View style={styles.innerContainer}>
-                <Text style={styles.itemHeading}>
-                  {item.heading[0].toUpperCase() + item.heading.slice(1)}
-                </Text>
-              </View>
-            </Pressable>
-          </View>
+          <TodoItem
+            item={item}
+            toggleComplete={toggleComplete}
+            deleteTodo={deleteTodo}
+            navigation={navigation}
+          />
         )}
       />
     </View>
@@ -97,30 +100,9 @@ const Home = ({navigation}) => {
 export default Home;
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#e5e5e5",
-    padding: 15,
-    borderRadius: 15,
-    margin: 5,
-    marginHorizontal: 10,
-    flexDirection: "row",
-    alignItems: "center"
-  },
-
-  innerContainer: {
-    alignItems: "center",
-    flexDirection: "column",
-    marginLeft: 45,
-  },
-  
-  itemHeading: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginRight: 22,
-  },
 
   formContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     height: 80,
     marginLeft: 10,
     marginRight: 10,
@@ -130,8 +112,8 @@ const styles = StyleSheet.create({
   input: {
     height: 48,
     borderRadius: 5,
-    overflow: "hidden",
-    backgroundColor: "#fff",
+    overflow: 'hidden',
+    backgroundColor: '#fff',
     paddingLeft: 16,
     flex: 1,
     marginRight: 5,
@@ -140,15 +122,15 @@ const styles = StyleSheet.create({
   button: {
     height: 47,
     borderRadius: 5,
-    backgroundColor: "#788eec",
+    backgroundColor: '#788eec',
     width: 80,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   buttonText: {
-    color: "#fff",
-    fontSize: 20
-  }
+    color: '#fff',
+    fontSize: 20,
+  },
 
 });
