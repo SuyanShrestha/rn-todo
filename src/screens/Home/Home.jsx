@@ -15,7 +15,7 @@ const Home = ({navigation, route}) => {
     selectedCategory: null,
     showIncomplete: false,
   });
-  const [originalTodos, setOriginalTodos] = useState([]); 
+  const [originalTodos, setOriginalTodos] = useState([]);
   const todoRef = firebase.firestore().collection('todos');
 
   // fetching data from firestore
@@ -30,7 +30,7 @@ const Home = ({navigation, route}) => {
         });
         setTodos(todos);
         setOriginalTodos(todos); // original todo made for clearFilter function
-        setFilteredTodos(todos); 
+        setFilteredTodos(todos);
       });
     return () => unsubscribe();
   }, []);
@@ -106,15 +106,15 @@ const Home = ({navigation, route}) => {
       <Text style={styles.title}>Home Screen</Text>
 
       <TouchableOpacity
-        style={styles.addButton}
+        style={styles.button}
         onPress={() => navigation.navigate('AddTodo')}>
-        <Text style={styles.addButtonText}>Add Todo</Text>
+        <Text style={styles.buttonText}>Add Todo</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.filterButton}
+        style={styles.button}
         onPress={() => navigation.navigate('Filter', {filters})}>
-        <Text style={styles.filterButtonText}>Filter</Text>
+        <Text style={styles.buttonText}>Filter</Text>
       </TouchableOpacity>
 
       <FlatList
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     margin: 20,
   },
-  addButton: {
+  button: {
     height: 47,
     borderRadius: 5,
     backgroundColor: colors.secondaryBgColor10,
@@ -153,20 +153,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     margin: 20,
   },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 20,
-  },
-  filterButton: {
-    height: 47,
-    borderRadius: 5,
-    backgroundColor: colors.secondaryBgColor10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 20,
-    marginBottom: 20,
-  },
-  filterButtonText: {
+  buttonText: {
     color: '#fff',
     fontSize: 20,
   },

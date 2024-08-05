@@ -1,3 +1,3 @@
-import { faMugSaucer, faSquare, faCheckSquare, faPencil } from '@fortawesome/free-solid-svg-icons/'
+import { faMugSaucer, faSquare, faCheckSquare, faPencil, faHome, faChartPie } from '@fortawesome/free-solid-svg-icons/'
 
-export {faMugSaucer, faSquare, faCheckSquare, faPencil}
+export {faMugSaucer, faSquare, faCheckSquare, faPencil, faHome, faChartPie}

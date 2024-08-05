@@ -19,7 +19,7 @@ const FilterScreen = ({navigation, route}) => {
   }, [route.params?.filters]);
 
   const applyFilters = () => {
-    navigation.navigate('Home', {
+    navigation.navigate('HomeScreen', {
       selectedTime,
       selectedCategory,
       showIncomplete,
@@ -27,7 +27,7 @@ const FilterScreen = ({navigation, route}) => {
   };
 
   const clearFilters = () => {
-    navigation.navigate('Home', {
+    navigation.navigate('HomeScreen', {
       selectedTime: null,
       selectedCategory: null,
       showIncomplete: false,
@@ -104,14 +104,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: colors.primaryColor10,
+    color: colors.secondaryBgColor10,
     textAlign: 'center',
     marginBottom: 20,
   },
   label: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.primaryColor10,
+    color: colors.secondaryBgColor10,
     marginBottom: 10,
   },
   optionsContainer: {

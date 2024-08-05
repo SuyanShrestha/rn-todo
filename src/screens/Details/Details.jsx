@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: colors.primaryColor30,
+    borderColor: colors.primaryColor60,
   },
   label: {
     fontSize: 18,

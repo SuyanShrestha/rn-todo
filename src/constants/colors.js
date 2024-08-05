@@ -6,5 +6,6 @@ export default {
   secondaryText30: '#fff',
   textInputBackground: '#fff',
 
-  unselectedCategory: '#ccc'
+  unselectedCategory: '#ccc',
+  selectedCategory: 'grey',
 };

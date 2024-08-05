@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: colors.primaryColor10,
+    color: colors.secondaryBgColor10,
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.primaryColor10,
+    color: colors.secondaryBgColor10,
     marginBottom: 10,
   },
   categoriesContainer: {
