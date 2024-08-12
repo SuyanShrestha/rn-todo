@@ -1,23 +1,88 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Keyboard, StyleSheet, ScrollView } from 'react-native';
 import { firebase } from '../../../config';
+import DatePicker from 'react-native-date-picker';
+import notifee from '@notifee/react-native';
 
 // constants
 import colors from '../../constants/colors';
 import categories from '../../constants/categories';
 
+// Function to display notification
+const onDisplayNotification = async (title, categoryColor) => {
+  try {
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+      sound: 'default',
+    });
+
+    // Generate a unique ID for the notification
+    const notificationId = `notification_${Date.now()}`;
+
+    await notifee.displayNotification({
+      id: notificationId, // Use unique notification ID
+      title: title, // Use the title from addData
+      body: 'It\'s time to work on your task!',
+      android: {
+        channelId,
+        color: categoryColor,
+        pressAction: {
+          id: 'default',
+        },
+      },
+    });
+
+    console.log('Notification displayed.');
+  } catch (error) {
+    console.error('Failed to display notification:', error);
+  }
+};
+
+// Function to schedule a notification
+const scheduleNotification = (selectedDate, title, categoryColor) => {
+  const now = new Date().getTime();
+  const selectedTime = selectedDate.getTime();
+  const delay = selectedTime - now;
+
+  if (delay > 0) {
+    setTimeout(() => {
+      onDisplayNotification(title, categoryColor);
+    }, delay);
+    console.log(
+      'Notification scheduled to display in',
+      delay / 1000,
+      'seconds.',
+    );
+  } else {
+    console.error('Selected time is in the past.');
+  }
+};
+
 const AddTodo = ({ navigation }) => {
   const [addData, setAddData] = useState('');
   const [category, setCategory] = useState(categories[0].name);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const todoRef = firebase.firestore().collection('todos');
 
   const addTodo = () => {
     if (addData && addData.length > 0) {
       const timeStamp = firebase.firestore.FieldValue.serverTimestamp();
-      todoRef.add({ heading: addData, createdAt: timeStamp, completed: false, category });
+      todoRef.add({
+        heading: addData,
+        createdAt: timeStamp,
+        completed: false,
+        category,
+        notificationDate: selectedDate, // Save the selected notification date
+      });
       setAddData('');
       Keyboard.dismiss();
-      navigation.goBack();  
+      navigation.goBack();
+
+      if (selectedDate) {
+        const categoryColor = categories.find(cat => cat.name === category)?.color || colors.defaultColor;
+        scheduleNotification(selectedDate, addData, categoryColor); 
+      }
     }
   };
 
@@ -59,6 +124,13 @@ const AddTodo = ({ navigation }) => {
             </View>
           ))}
         </View>
+
+        <Text style={styles.label}>Set Notification Date & Time</Text>
+        <DatePicker
+          date={selectedDate}
+          onDateChange={setSelectedDate}
+          mode="datetime"
+        />
 
         <TouchableOpacity style={styles.button} onPress={addTodo}>
           <Text style={styles.buttonText}>Add</Text>

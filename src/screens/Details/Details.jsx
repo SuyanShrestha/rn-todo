@@ -1,13 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { firebase } from '../../../config';
+import DatePicker from 'react-native-date-picker';
+import notifee from '@notifee/react-native';
 import colors from '../../constants/colors';
 import categories from '../../constants/categories';
+
+// Function to display notification
+const onDisplayNotification = async (title, categoryColor) => {
+  try {
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+      sound: 'default',
+    });
+
+    // Generate a unique ID for the notification
+    const notificationId = `notification_${Date.now()}`;
+
+    await notifee.displayNotification({
+      id: notificationId, // Use unique notification ID
+      title: title, // Use the title from addData
+      body: 'It\'s time to work on your task!',
+      android: {
+        channelId,
+        color: categoryColor, // Set the background color based on category
+        pressAction: {
+          id: 'default',
+        },
+      },
+    });
+
+    console.log('Notification displayed.');
+  } catch (error) {
+    console.error('Failed to display notification:', error);
+  }
+};
+
+// Function to schedule a notification
+const scheduleNotification = (selectedDate, title, categoryColor) => {
+  const now = new Date().getTime();
+  const selectedTime = selectedDate.getTime();
+  const delay = selectedTime - now;
+
+  if (delay > 0) {
+    setTimeout(() => {
+      onDisplayNotification(title, categoryColor);
+    }, delay);
+    console.log(
+      'Notification scheduled to display in',
+      delay / 1000,
+      'seconds.',
+    );
+  } else {
+    console.error('Selected time is in the past.');
+  }
+};
 
 const Details = ({ navigation, route }) => {
   const todoRef = firebase.firestore().collection('todos');
   const [textHeading, setTextHeading] = useState(route.params.item.heading);
   const [selectedCategory, setSelectedCategory] = useState(route.params.item.category);
+  const [selectedDate, setSelectedDate] = useState(new Date()); // State for selected date
 
   useEffect(() => {
     setSelectedCategory(route.params.item.category);
@@ -15,18 +69,29 @@ const Details = ({ navigation, route }) => {
 
   const updateTodo = () => {
     if (textHeading && textHeading.length > 0) {
+      navigation.navigate('HomeScreen');
+  
       todoRef
         .doc(route.params.item.id)
         .update({
           heading: textHeading,
           category: selectedCategory,
+          notificationDate: selectedDate, // Update the selected notification date
         })
         .then(() => {
-          navigation.navigate('Home');
+          // Schedule notification after the Firestore update is successful
+          if (selectedDate) {
+            const categoryColor = categories.find(cat => cat.name === selectedCategory)?.color || colors.defaultColor;
+            scheduleNotification(selectedDate, textHeading, categoryColor);
+          }
         })
-        .catch(error => alert(error.message));
+        .catch(error => {
+          // Handle any errors that occur during the update or scheduling
+          console.error('Error updating todo:', error.message);
+        });
     }
   };
+  
 
   return (
     <ScrollView style={styles.container}>
@@ -64,12 +129,21 @@ const Details = ({ navigation, route }) => {
         ))}
       </View>
 
+      <Text style={styles.label}>Set Notification Date & Time</Text>
+      <DatePicker
+        date={selectedDate}
+        onDateChange={setSelectedDate}
+        mode="datetime" // You can choose date, time, or datetime
+      />
+
       <TouchableOpacity style={styles.button} onPress={updateTodo}>
         <Text style={styles.buttonText}>Update Todo</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 };
+
+export default Details;
 
 const styles = StyleSheet.create({
   container: {
@@ -151,5 +225,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
-export default Details;
